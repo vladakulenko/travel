@@ -1,19 +1,34 @@
+import type React from 'react';
+
 import { useGeoSearch } from '../../hooks/useGeoSearch';
+import { useTourSearch } from '../../hooks/useTourSearch';
+import { getCountryID } from '../../utils/getCountryId';
 import { Input } from './Input/Input';
 import { Dropdown } from './Dropdown/Dropdown';
-import type React from 'react';
+import { SearchStatus } from '../SearchStatus/SearchStatus';
+import { TourList } from '../TourList/TourList';
 
 import styles from './FormContainer.module.css';
 
 export const FormContainer = () => {
-    const { value, items, isOpen, openDropdown, onInputChange, onSelect } =
-        useGeoSearch();
+    const {
+        value,
+        items,
+        isOpen,
+        selected,
+        openDropdown,
+        onInputChange,
+        onSelect,
+    } = useGeoSearch();
+    const { startSearch, state, error, results } = useTourSearch();
+    const countryID = getCountryID(selected);
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // здесь дальше будет реальный поиск туров
-        console.log('SUBMIT SEARCH:', value);
+        if (!countryID) return;
+
+        startSearch(countryID);
     };
 
     return (
@@ -30,6 +45,10 @@ export const FormContainer = () => {
             <button className={styles.button} type='submit'>
                 Знайти
             </button>
+
+            <SearchStatus state={state} error={error} />
+
+            {state === 'success' && <TourList results={results} />}
         </form>
     );
 };

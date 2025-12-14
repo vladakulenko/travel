@@ -46,6 +46,7 @@ export const useGeoSearch = () => {
         value,
         items,
         isOpen,
+        selected,
         openDropdown,
         onInputChange,
         onSelect,
