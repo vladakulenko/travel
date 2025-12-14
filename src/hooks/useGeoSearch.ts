@@ -12,7 +12,6 @@ export const useGeoSearch = () => {
     const openDropdown = async () => {
         setIsOpen(true);
 
-        // повторный клик
         if (selected?.type === 'country') {
             setItems(await fetchCountries());
         }

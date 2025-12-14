@@ -11,8 +11,8 @@ export const fetchCountries = async (): Promise<GeoEntity[]> => {
     const response = await getCountries();
     const data: Record<string, CountryData> = await response.json();
 
-    return Object.values(data).map((c) => ({
-        ...c,
+    return Object.values(data).map((country) => ({
+        ...country,
         type: 'country' as const,
     }));
 };

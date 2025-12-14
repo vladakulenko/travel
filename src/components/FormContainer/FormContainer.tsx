@@ -17,17 +17,6 @@ export const FormContainer = () => {
     };
 
     return (
-        // <div style={{ position: 'relative', width: 400 }}>
-        //     <Input
-        //         value={value}
-        //         placeholder='Куди їдемо?'
-        //         onClick={openDropdown}
-        //         onChange={onInputChange}
-        //     />
-
-        //     {isOpen && <Dropdown items={items} onSelect={onSelect} />}
-        // </div>
-
         <form onSubmit={onSubmit} className={styles['form-wrapper']}>
             <Input
                 value={value}
