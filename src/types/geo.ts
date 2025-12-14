@@ -7,4 +7,5 @@ export interface GeoEntity {
 
     flag?: string;
     img?: string;
+    countryId?: string;
 }
