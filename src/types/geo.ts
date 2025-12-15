@@ -9,3 +9,9 @@ export interface GeoEntity {
     img?: string;
     countryId?: string;
 }
+
+export type Country = {
+    id: string;
+    name: string;
+    flag: string;
+};
