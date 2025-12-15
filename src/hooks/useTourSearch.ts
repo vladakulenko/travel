@@ -1,7 +1,13 @@
 import { useState, useMemo } from 'react';
-import { startSearchPrices, getSearchPrices, getHotels } from '../api/api';
+import {
+    startSearchPrices,
+    getSearchPrices,
+    getHotels,
+    getCountries,
+} from '../api/api';
 import { waitUntil } from '../utils/wait';
 import type { SearchState } from '../types/search';
+import type { Country } from '../types/geo';
 
 const MAX_RETRIES = 2;
 
@@ -21,6 +27,10 @@ export type TourResult = {
     currency: string;
     startDate: string;
     endDate: string;
+    hotelImg?: string;
+    cityName?: string;
+    countryName?: string;
+    countryFlag?: string;
 };
 
 type Hotel = {
@@ -40,7 +50,12 @@ export const useTourSearch = () => {
         string,
         PriceItem
     > | null>(null);
-    const [hotels, setHotels] = useState<Record<number, Hotel>>({});
+    const [hotelsCache, setHotelsCache] = useState<
+        Record<string, Record<number, Hotel>>
+    >({});
+    const [countriesCache, setCountriesCache] = useState<
+        Record<string, Country>
+    >({});
 
     const startSearch = async (countryID: string) => {
         let retries = 0;
@@ -64,11 +79,31 @@ export const useTourSearch = () => {
                     const data: { prices: Record<string, PriceItem> } =
                         await response.json();
 
-                    // Fetch hotels for the country to use synchronously
-                    const hotelsResponse = await getHotels(countryID);
-                    const hotelsData: Record<number, Hotel> =
-                        await hotelsResponse.json();
-                    setHotels(hotelsData);
+                    if (!hotelsCache[countryID]) {
+                        const hotelsResponse = await getHotels(countryID);
+                        const hotelsDataRaw = await hotelsResponse.json();
+                        const hotelsArray: Hotel[] = Array.isArray(
+                            hotelsDataRaw
+                        )
+                            ? hotelsDataRaw
+                            : Object.values(hotelsDataRaw);
+                        const hotelsData: Record<number, Hotel> = {};
+                        hotelsArray.forEach((hotel) => {
+                            hotelsData[hotel.id] = hotel;
+                        });
+
+                        setHotelsCache((prev) => ({
+                            ...prev,
+                            [countryID]: hotelsData,
+                        }));
+                    }
+
+                    if (Object.keys(countriesCache).length === 0) {
+                        const countriesResponse = await getCountries();
+                        const countriesData: Record<string, Country> =
+                            await countriesResponse.json();
+                        setCountriesCache(countriesData);
+                    }
 
                     setRawResults(data.prices);
                     setState('success');
@@ -109,17 +144,28 @@ export const useTourSearch = () => {
         if (!rawResults) return [];
 
         return Object.values(rawResults).map((item) => {
-            const hotel = hotels[item.hotelID];
+            const hotel = Object.values(hotelsCache)
+                .flatMap((h) => Object.values(h))
+                .find((h) => h.id === Number(item.hotelID));
+
+            const country = hotel?.countryId
+                ? countriesCache[hotel.countryId]
+                : undefined;
+
             return {
                 id: item.id,
                 hotelName: hotel?.name || 'Unknown Hotel',
+                hotelImg: hotel?.img || '/fallback-hotel.png',
+                cityName: hotel?.cityName,
+                countryName: hotel?.countryName,
+                countryFlag: country?.flag || '/fallback-flag.png',
                 price: item.amount,
                 currency: item.currency,
                 startDate: item.startDate,
                 endDate: item.endDate,
             };
         });
-    }, [rawResults, hotels]);
+    }, [rawResults, hotelsCache, countriesCache]);
 
     return {
         startSearch,

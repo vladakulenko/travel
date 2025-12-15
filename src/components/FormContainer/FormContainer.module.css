@@ -1,8 +1,10 @@
 .form-wrapper {
     position: relative;
     width: 300px;
+    margin: 10px auto 0;
 }
 
 .button {
-    margin: 10px 0 0;
+    margin: 10px auto;
+    display: block;
 }

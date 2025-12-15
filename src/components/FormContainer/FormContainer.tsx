@@ -32,23 +32,24 @@ export const FormContainer = () => {
     };
 
     return (
-        <form onSubmit={onSubmit} className={styles['form-wrapper']}>
-            <Input
-                value={value}
-                placeholder='Куди їдемо?'
-                onClick={openDropdown}
-                onChange={onInputChange}
-            />
+        <>
+            <form onSubmit={onSubmit} className={styles['form-wrapper']}>
+                <Input
+                    value={value}
+                    placeholder='Куди їдемо?'
+                    onClick={openDropdown}
+                    onChange={onInputChange}
+                />
 
-            {isOpen && <Dropdown items={items} onSelect={onSelect} />}
+                {isOpen && <Dropdown items={items} onSelect={onSelect} />}
 
-            <button className={styles.button} type='submit'>
-                Знайти
-            </button>
+                <button className={styles.button} type='submit'>
+                    Знайти
+                </button>
 
-            <SearchStatus state={state} error={error} />
-
+                <SearchStatus state={state} error={error} />
+            </form>
             {state === 'success' && <TourList results={results} />}
-        </form>
+        </>
     );
 };
